@@ -4,7 +4,7 @@
 .classpath
 .cache
 .settings/
-
+srbench.properties
 
 # sbt specific
 dist/*
