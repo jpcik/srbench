@@ -10,8 +10,10 @@ crossPaths := false
 
 libraryDependencies ++= Seq(
   "com.hp.hpl.jena" % "jena" % "2.6.4",
-  "es.upm.fi.oeg.morph" % "morph-core" % "1.0.1",
-  "es.upm.fi.oeg.morph" % "morph-querygen" % "1.0.1",
+  "org.scalaj" %% "scalaj-time" % "0.6",
+  "es.upm.fi.oeg.morph" % "sparql-stream" % "1.0.1",
+  "es.upm.fi.oeg.morph.streams" % "adapter-esper" % "1.0.2",
+  "es.upm.fi.oeg.morph.streams" % "esper-engine" % "1.0.0",
   "postgresql" % "postgresql" % "9.1-901.jdbc4"
 )
 

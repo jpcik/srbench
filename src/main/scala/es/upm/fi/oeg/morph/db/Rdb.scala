@@ -5,6 +5,15 @@ import java.sql.DriverManager
 import com.hp.hpl.jena.datatypes.RDFDatatype
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype
 import org.postgresql.util.PSQLException
+import java.sql.Connection
+import java.sql.ResultSet
+
+class QueryConnection(con:Connection,res:ResultSet){
+  def close{
+    res.close
+    con.close    
+  }
+}
 
 class Rdb(props:Properties) extends JDBCRelationalModel(props){
   private def getConnection=
@@ -29,7 +38,7 @@ class Rdb(props:Properties) extends JDBCRelationalModel(props){
       else throw e}
     con.close
   }
-
+/*
   def getAll(q:String,colNames:Array[String])={
     val con=getConnection
     val res=con.prepareStatement(q).executeQuery
@@ -42,7 +51,16 @@ class Rdb(props:Properties) extends JDBCRelationalModel(props){
     
     //result
   }
-
+*/
+  
+  def query(q:String,colNames:Array[String])={
+    val con=getConnection
+    val res=con.prepareStatement(q).executeQuery
+    val result=Stream.continually(res.next).takeWhile(n=>n).map{r=>
+      colNames.map{col=>res.getObject(col)}
+    }
+    (result,new QueryConnection(con,res))
+  }
   
   def queryFirst(q:String,colNames:Array[String])={
     val con=getConnection
