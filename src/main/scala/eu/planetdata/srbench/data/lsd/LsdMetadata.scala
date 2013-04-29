@@ -18,6 +18,7 @@ import com.hp.hpl.jena.datatypes.DatatypeFormatException
 import es.upm.fi.oeg.siq.voc.Wgs84
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype
 import es.upm.fi.oeg.siq.voc.XMLSchema
+import scala.language.implicitConversions
 
 trait RdfNavigate{
   case class ExtendedResource(r:Resource){

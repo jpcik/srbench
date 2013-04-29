@@ -1,0 +1,119 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> . 
+@prefix dul: <http://www.loa-cnr.it/ontologies/DUL.owl#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix morph: <http://oeg-upm.net/ns/morph#> .
+@prefix om-owl: <http://knoesis.wright.edu/ssw/ont/sensor-observation.owl#> .
+@prefix weather: <http://knoesis.wright.edu/ssw/ont/weather.owl#> .
+@prefix sens-obs: <http://knoesis.wright.edu/ssw/> .
+@prefix owl-time: <http://www.w3.org/2006/time#> .
+@prefix srbench: <http://cwi.nl/SRBench/> .
+@prefix : <http://es.upm.fi.dia.oeg/R2RMapping#> . 
+
+:graphDef rr:template "http://knoesis.wright.edu/ssw/data_{timeformat}".
+
+:lsdObsTableTemp rr:sqlQuery '''SELECT station.code as code, 
+                                to_char(samplingtime, 'YYYY_MM_DD_HH12_MI_SS')  AS timeformat,  
+                                to_char(samplingtime, 'YYYY-MM-DD"T"HH24:MI:SS')  AS timecomplete,  
+                                obs.stationid,airtemperature,precipitation,samplingtime 
+                                FROM observation_2hours obs ,station 
+                                WHERE obs.stationid=station.stationid AND obs.airtemperature is not null '''; 
+morph:pk "stationId,observationTime" .
+
+:lsdObsTablePrec rr:sqlQuery '''SELECT station.code as code,
+                                to_char(samplingtime, 'YYYY_MM_DD_HH12_MI_SS')  AS timeformat, 
+                                obs.stationid,airtemperature,precipitation,samplingtime 
+                                FROM observation_2hours obs ,station 
+                                where obs.stationid=station.stationid AND obs.precipitation is not null '''; 
+morph:pk "stationId,observationTime" .
+
+:lsdObsTableHum rr:sqlQuery '''SELECT station.code as code,
+                                to_char(samplingtime, 'YYYY_MM_DD_HH12_MI_SS')  AS timeformat, 
+                                obs.stationid,relativehumidity,precipitation,samplingtime 
+                                FROM observation_2hours obs ,station 
+                                where obs.stationid=station.stationid AND obs.relativehumidity is not null '''; 
+morph:pk "stationId,observationTime" .
+
+:station a rr:TrriplesMap;
+  rr:logicalTable [rr:tableName "station"]; 
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/System_{code}"; 
+                    rr:class om-owl:System; rr:graph srbench:observations ];
+ rr:predicateObjectMap [ rr:predicate om-owl:ID; rr:objectMap	[ rr:column "code" ] ];                    
+.
+
+:obsInstant a rr:TriplesMap;
+  rr:logicalTable :lsdObsTableTemp; 
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/Instant_{timeformat}"; 
+                    rr:class owl-time:Instant; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate owl-time:inXSDDateTime; 
+                          rr:objectMap	[ rr:column "timecomplete"; rr:dataType xsd:dateTime ] ];     		   		  
+ .
+
+:systemProcedure rr:predicate om-owl:procedure; 
+                rr:objectMap [ rr:template "http://knoesis.wright.edu/ssw/System_{code}"   ]
+.
+
+:instantSampling rr:predicate om-owl:samplingTime; 
+                 rr:objectMap [ rr:template "http://knoesis.wright.edu/ssw/Instant_{timeformat}"]
+.
+
+:tempObsResult a rr:TriplesMap;
+  rr:logicalTable :lsdObsTableTemp; 
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_AirTemperature_{code}_{timeformat}"; 
+                    rr:class om-owl:MeasureData; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate om-owl:floatValue; 
+                          rr:objectMap	[ rr:column "airtemperature"; rr:datatype xsd:double; ] ];     		   		  
+  rr:predicateObjectMap [ rr:predicate om-owl:uom; rr:objectMap	[ rr:constant weather:fahrenheit ] ];     		   		  
+.
+
+:tempObs a rr:TriplesMap;
+  rr:logicalTable :lsdObsTableTemp;
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/Observation_AirTemperature_{code}_{timeformat}"; 
+                    rr:class weather:TemperatureObservation; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate om-owl:result;
+                          rr:objectMap [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_AirTemperature_{code}_{timeformat}" ]];
+  rr:predicateObjectMap :systemProcedure;
+  rr:predicateObjectMap [ rr:predicate om-owl:observedProperty; rr:objectMap [ rr:constant weather:_AirTemperature] ];
+  rr:predicateObjectMap :instantSampling;
+.   
+ 
+:precObsResult a rr:TriplesMap;
+  rr:logicalTable :lsdObsTablePrec; 
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_Precipitation_{code}_{timeformat}"; 
+                    rr:class om-owl:MeasureData; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate om-owl:floatValue; rr:objectMap	[ rr:column "precipitation"; rr:datatype xsd:double ] ];     		   		  
+  rr:predicateObjectMap [ rr:predicate om-owl:uom; rr:objectMap	[ rr:constant weather:centimeters ] ];     		   		  
+.
+
+:precObs a rr:TriplesMap;
+  rr:logicalTable :lsdObsTablePrec;
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/Observation_Precipitation_{code}_{timeformat}"; 
+                    rr:class weather:PrecipitationObservation; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate om-owl:result;
+                          rr:objectMap [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_Precipitation_{code}_{timeformat}" ]];
+  rr:predicateObjectMap :systemProcedure;
+  rr:predicateObjectMap [ rr:predicate om-owl:observedProperty; rr:objectMap [ rr:constant weather:_Precipitation] ];
+  rr:predicateObjectMap :instantSampling;
+.   
+ 
+:humObsResult a rr:TriplesMap;
+  rr:logicalTable :lsdObsTableHum; 
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_RelativeHumidity_{code}_{timeformat}"; 
+                    rr:class om-owl:MeasureData; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate om-owl:floatValue; rr:objectMap	[ rr:column "relativehumidity"; rr:datatype xsd:double ] ];     		   		  
+  rr:predicateObjectMap [ rr:predicate om-owl:uom; rr:objectMap	[ rr:constant weather:percentage ] ];     		   		  
+.
+
+:humObs a rr:TriplesMap;
+  rr:logicalTable :lsdObsTableHum;
+  rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/Observation_RelativeHumidity_{code}_{timeformat}"; 
+                    rr:class weather:RelativeHumidityObservation; rr:graphMap :graphDef ];
+  rr:predicateObjectMap [ rr:predicate om-owl:result;
+                          rr:objectMap [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_RelativeHumidity_{code}_{timeformat}" ]];
+  rr:predicateObjectMap :systemProcedure;
+  rr:predicateObjectMap [ rr:predicate om-owl:observedProperty; rr:objectMap [ rr:constant weather:_RelativeHumidity] ];
+  rr:predicateObjectMap :instantSampling;
+.   
+ 

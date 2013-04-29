@@ -7,13 +7,16 @@ http://www.espertech.com/schema/esper/esper-configuration-2.0.xsd">
 <event-type name="lsd_observations">
   <java-util-map>
     <map-property name="stationId" class="string"/>
+    <map-property name="code" class="string"/>
     <map-property name="internalTime" class="long"/>
+    <map-property name="timeformat" class="string"/>
     <map-property name="observationTime" class="string"/>
     <map-property name="temperature" class="double"/>    
     <map-property name="relativeHumidity" class="double"/>    
     <map-property name="windDirection" class="double"/>    
     <map-property name="windSpeed" class="double"/>    
     <map-property name="airPressure" class="double"/>    
+    <map-property name="precipitation" class="double"/>    
   </java-util-map>
 </event-type>
 </esper-configuration>	
