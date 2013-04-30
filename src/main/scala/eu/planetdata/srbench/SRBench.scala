@@ -34,6 +34,12 @@ import scala.collection.mutable.ArrayBuffer
 import org.slf4j.Logger
 import java.io.OutputStream
 import java.io.FileOutputStream
+import play.api.libs.json.Json
+import play.api.libs.json.Json._
+import com.hp.hpl.jena.rdf.model.RDFNode
+import com.hp.hpl.jena.rdf.model.Literal
+import com.hp.hpl.jena.rdf.model.Resource
+import play.api.libs.json.JsValue
 
 object SRBench {
   val logger = LoggerFactory.getLogger(this.getClass)
@@ -66,13 +72,39 @@ object SRBench {
     }*/
     val end=Platform.currentTime
     esper.system.shutdown
-    rec.serializeAll(o)
+    //rec.serializeAll(o)
+    rec.jsonize(o)
     o.close
     logger.debug("elapsed "+ (end-init))
   }  
 }
 
 object Utils{
+  
+  def jsonValue(v:String,value:RDFNode):JsValue=value match{
+    case lit:Literal=>toJson(Map("type"->toJson("literal"),
+                                  "datatype"->toJson(lit.getDatatypeURI),
+                                  "value"->toJson(lit.getString)))
+    case res:Resource=>toJson(Map("type"->toJson("uri"),
+                                  "value"->toJson(res.getURI)))
+  }
+  
+  def json(time:Long,s:SparqlResults):JsValue={    
+    val timed=Math.round(time/500)*500
+    val vars=s.getResultSet.getResultVars    
+    val dat:Iterator[Map[String,JsValue]]=s.getResultSet.map{r=>
+      val binding=vars.map(v=>(v->jsonValue(v,r.get(v)))).toMap
+      Map("timestamp"->toJson(timed),
+          "binding"->toJson(binding))        
+    }
+  
+    toJson(
+      Map("head"->toJson(Map("vars"->vars.map(v=>toJson(v)))),
+          "timestamp"->toJson(timed),          
+          "results"->toJson(Map("bindings"->toJson(dat.toSeq))))           
+    )
+  }
+  
   def print(l:Logger,time:Long,o:OutputStream,s:SparqlResults):Unit={
     val timed=Math.round(time/500)*500
     l.debug("time %s " format time)
@@ -83,6 +115,8 @@ object Utils{
   }
   
   def print(s:SparqlResults,time:Long,o:OutputStream):Unit={
+    //json(time,s)
+    
     val vars=s.getResultSet.getResultVars
     if (!s.getResultSet.hasNext)
       o.write(("<>:["+time+"]\r").getBytes)
@@ -105,4 +139,12 @@ class CustomReceiver(start:Long) extends StreamReceiver{
   def serializeAll(o:OutputStream)=allResults.foreach{p=>
     Utils.print(logger, p._1,o,p._2)
   }
+
+  def jsonize(o:OutputStream)={
+    val tt:Seq[JsValue]=allResults.map(r=>Utils.json(r._1,r._2)).toSeq
+    
+    val js=Json.toJson(Map("results"->toJson(tt)))
+    o.write(Json.stringify(js).getBytes)
+  }
+
 }
