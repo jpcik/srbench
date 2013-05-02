@@ -42,7 +42,7 @@ import com.hp.hpl.jena.rdf.model.Resource
 import play.api.libs.json.JsValue
 
 object SRBench {
-  val logger = LoggerFactory.getLogger(this.getClass)
+  val logger = LoggerFactory.getLogger(this.getClass)  
   private def srbench(q:String)=loadQuery("queries/srbench/"+q)
   private val srbenchR2rml=new URI("mappings/srbench.ttl")
 
@@ -53,95 +53,74 @@ object SRBench {
     esper.startup    
     val proxy=new EsperProxy(esper.system)
     val feed=new LsdDataFeed(props,proxy)
+    val rate = props.getProperty("feed.rate").toLong
     //val actor=proxy.system.actorOf(Props(new StreamRec),"acting")
     //val query="SELECT DISTINCT observationTime AS observationTime,temperature AS value,stationId AS stationId,NULL AS sensor FROM lsd_observations.win:time(1.0 second) AS rel0"
     //proxy.engine ! ListenQuery(query,actor)
+    val query=props.getProperty("srbench.query")
+    val pull=props.getProperty("srbench.pull").equals("true")
+    val interval=props.getProperty("srbench.pull.interval").toInt
+    val maxtime=props.getProperty("srbench.maxtime").toInt
+    val o=new FileOutputStream("result.out")    
+    val rec=new CustomReceiver(Platform.currentTime,rate)
+    //val init=Platform.currentTime
 
-    val o= new FileOutputStream("result.out")
     
-    val rec=new CustomReceiver(Platform.currentTime)    
-    eval.listenToQuery(srbench("q7.sparql"),srbenchR2rml,rec)
-    //val key=eval.registerQuery(srbench("q5.sparql"), srbenchR2rml)
-    val init=Platform.currentTime
-    feed.schedule
-    Thread.sleep(30000)
-    /*
-    (1 to 30).foreach{i=>
-      Thread.sleep(1000)
-      Utils.print(logger, Platform.currentTime-init,o, eval.pull(key))
-    }*/
+    if (pull){
+      logger.info("pulling")
+      val key=eval.registerQuery(srbench(query), srbenchR2rml)
+      feed.schedule
+      rec.initTime
+      (1 to maxtime/interval).foreach{i=>
+        Thread.sleep(interval)
+        rec.receiveData(eval.pull(key))     
+      }      
+    }
+    else{
+      logger.info("pushing")
+      eval.listenToQuery(srbench(query),srbenchR2rml,rec)
+      feed.schedule
+      rec.initTime
+      Thread.sleep(maxtime)
+    }
+      
+    
     val end=Platform.currentTime
     esper.system.shutdown
-    //rec.serializeAll(o)
-    rec.jsonize(o)
+    rec.serializeAll(System.out)
+    
+    //rec.jsonize(o)
     o.close
-    logger.debug("elapsed "+ (end-init))
+    //logger.debug("elapsed "+ (end-init))
   }  
 }
 
-object Utils{
-  
-  def jsonValue(v:String,value:RDFNode):JsValue=value match{
-    case lit:Literal=>toJson(Map("type"->toJson("literal"),
-                                  "datatype"->toJson(lit.getDatatypeURI),
-                                  "value"->toJson(lit.getString)))
-    case res:Resource=>toJson(Map("type"->toJson("uri"),
-                                  "value"->toJson(res.getURI)))
-  }
-  
-  def json(time:Long,s:SparqlResults):JsValue={    
-    val timed=Math.round(time/500)*500
-    val vars=s.getResultSet.getResultVars    
-    val dat:Iterator[Map[String,JsValue]]=s.getResultSet.map{r=>
-      val binding=vars.map(v=>(v->jsonValue(v,r.get(v)))).toMap
-      Map("timestamp"->toJson(timed),
-          "binding"->toJson(binding))        
-    }
-  
-    toJson(
-      Map("head"->toJson(Map("vars"->vars.map(v=>toJson(v)))),
-          "timestamp"->toJson(timed),          
-          "results"->toJson(Map("bindings"->toJson(dat.toSeq))))           
-    )
-  }
-  
-  def print(l:Logger,time:Long,o:OutputStream,s:SparqlResults):Unit={
-    val timed=Math.round(time/500)*500
-    l.debug("time %s " format time)
-    //o.write(("time: %s\r" format timed).getBytes )
-    //ResultSetFormatter.outputAsCSV(o,s.getResultSet)
-    print(s,timed,o)
-    
-  }
-  
-  def print(s:SparqlResults,time:Long,o:OutputStream):Unit={
-    //json(time,s)
-    
-    val vars=s.getResultSet.getResultVars
-    if (!s.getResultSet.hasNext)
-      o.write(("<>:["+time+"]\r").getBytes)
-    s.getResultSet.foreach{rs=>
-      o.write(("<"+vars.map(v=>v+"="+rs.get(v)).mkString(" ")+" >:["+time+"]\r").getBytes)
-    }
-  }
-}
 
-class CustomReceiver(start:Long) extends StreamReceiver{
+class CustomReceiver(start:Long,rate:Long) extends StreamReceiver{
   private val logger=LoggerFactory.getLogger(this.getClass)
   private val allResults=new ArrayBuffer[(Long,SparqlResults)]()
- 
+  private val rounding=(rate).toDouble
+  var stTime=0L
+  
+  def initTime{
+    stTime=Platform.currentTime
+  }
+  
   override def receiveData(s:SparqlResults){
-    logger.debug("got at: "+(Platform.currentTime-start))
+    logger.debug("got at: "+(Platform.currentTime-stTime))
     //Utils.print(logger, Platform.currentTime-start,System.out, s)
-    allResults.+= ((Platform.currentTime-start,s))
+    val orig=Platform.currentTime-stTime
+    val timed:Long = (Math.round(orig/rounding)*rounding).toLong
+    //logger.info("times: "+orig+" "+timed)
+    allResults.+= ((timed,s))
   }
   
   def serializeAll(o:OutputStream)=allResults.foreach{p=>
-    Utils.print(logger, p._1,o,p._2)
+    IOUtils.print(p._1,o,p._2)
   }
 
   def jsonize(o:OutputStream)={
-    val tt:Seq[JsValue]=allResults.map(r=>Utils.json(r._1,r._2)).toSeq
+    val tt:Seq[JsValue]=allResults.map(r=>IOUtils.json(r._1,r._2)).toSeq
     
     val js=Json.toJson(Map("results"->toJson(tt)))
     o.write(Json.stringify(js).getBytes)

@@ -2,8 +2,8 @@ PREFIX om-owl: <http://knoesis.wright.edu/ssw/ont/sensor-observation.owl#>
 PREFIX weather: <http://knoesis.wright.edu/ssw/ont/weather.owl#> 
 PREFIX sens-obs: <http://knoesis.wright.edu/ssw/>
 
-SELECT  ?ob1 
-FROM NAMED STREAM <http://cwi.nl/SRBench/observations>[NOW - 5 S SLIDE 5 S]
+SELECT  ?ob1 ?ob ?value1  ?value ?sensor   
+FROM NAMED STREAM <http://cwi.nl/SRBench/observations>[NOW - 500 MS SLIDE 500 MS]
 WHERE { 
   {?ob  om-owl:procedure sens-obs:System_C1190 ; 
         om-owl:observedProperty weather:_AirTemperature ;       

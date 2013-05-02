@@ -17,15 +17,15 @@ import scala.language.postfixOps
 
 class LsdDataFeed(props:Properties,val proxy:EsperProxy) {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val rate=1
+  private val rate=props.getProperty("feed.rate").toLong
   private val interval=5
   private val window=30
   private val dateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ssZ")
-  private val startTime=dateFormat.parse("2004-08-08 06:00:00+0200")
-  private val attributes=Array("observationTime","stationId","temperature","relativeHumidity","precipitation","timeformat","code")
+  private val startTime=dateFormat.parse(props.getProperty("feed.starttime"))
+  private val attributes=props.getProperty("feed.attnames").split(',')
   private val dbattributes=Array("samplingtime","st.stationid","airtemperature","relativehumidity","precipitation","to_char(samplingtime, 'YYYY_MM_DD_HH12_MI_SS')","st.code")
   val projatts=dbattributes.zip(attributes).map(a=>a._1+" AS "+a._2).mkString(",")
-  private val conditions=" and st.stationid>=3000 and st.stationid<=3200 and samplingtime<'2004-08-08 07:55:00+02' "
+  private val conditions=props.getProperty("feed.conditions").split(',').mkString(" and ")
   
   def getData(date:Date)={
     val db=new Rdb(props)
@@ -35,7 +35,7 @@ class LsdDataFeed(props:Properties,val proxy:EsperProxy) {
     val init=Platform.currentTime
     logger.debug("Date: "+dateStr)
     //'2004-08-08 06:00:00+02'
-    val (res,con)=db.query("select "+projatts+" from observation obs, station st where st.stationid=obs.stationid and samplingtime>='"+dateStr+"' and samplingtime<'"+datefin+"'"+conditions,
+    val (res,con)=db.query("select "+projatts+" from observation obs, station st where st.stationid=obs.stationid and samplingtime>='"+dateStr+"' and samplingtime<'"+datefin+"' and "+conditions,
     		attributes)
     val grouped=res.groupBy(a=>a(0)).map{v=>
       val key=dateFormat.format(v._1.asInstanceOf[Timestamp])
@@ -84,7 +84,7 @@ class LsdDataFeed(props:Properties,val proxy:EsperProxy) {
     val datas:Iterator[(String,Seq[EsperEvent])]=new DataIterator
     lazy val init =Platform.currentTime
     import proxy.system.dispatcher
-    proxy.system.scheduler.schedule(0 seconds, rate seconds){
+    proxy.system.scheduler.schedule(0 seconds, rate milliseconds){
       val dnext=datas.next
       if (dnext!=null){
         logger.trace((Platform.currentTime-init)+" sending "+dnext._1)
