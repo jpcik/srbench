@@ -56,7 +56,7 @@
   rr:predicateObjectMap [ rr:predicate om-owl:observedProperty; rr:objectMap [ rr:constant weather:Precipitation] ];
 .   
  
-:humObsResult a rr:TriplesMap;
+:humObsResult a rr:TrriplesMap;
   rr:logicalTable :lsdObsTable; 
   rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/MeasureData_RelativeHumidity_{code}_{timeformat}"; 
                     rr:class om-owl:MeasureData; rr:graph srbench:observations ];
@@ -65,7 +65,7 @@
 .
 
 
-:humObs a rr:TriplesMap;
+:humObs a rr:TrriplesMap;
   rr:logicalTable :lsdObsTable;
   rr:subjectMap   [ rr:template "http://knoesis.wright.edu/ssw/Observation_RelativeHumidity_{code}_{timeformat}"; 
                     rr:class weather:HumidityObservation; rr:graph srbench:observations ];

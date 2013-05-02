@@ -50,7 +50,7 @@ object SRBench {
     val props=load(new File("conf/srbench.properties"))
     val esper=new EsperServer           
     val eval = new QueryEvaluator(props,esper.system)
-    esper.startup
+    esper.startup    
     val proxy=new EsperProxy(esper.system)
     val feed=new LsdDataFeed(props,proxy)
     //val actor=proxy.system.actorOf(Props(new StreamRec),"acting")
@@ -60,7 +60,7 @@ object SRBench {
     val o= new FileOutputStream("result.out")
     
     val rec=new CustomReceiver(Platform.currentTime)    
-    eval.listenToQuery(srbench("q1.sparql"),srbenchR2rml,rec)
+    eval.listenToQuery(srbench("q7.sparql"),srbenchR2rml,rec)
     //val key=eval.registerQuery(srbench("q5.sparql"), srbenchR2rml)
     val init=Platform.currentTime
     feed.schedule
