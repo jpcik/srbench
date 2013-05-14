@@ -26,7 +26,12 @@ class Rdb(props:Properties) extends JDBCRelationalModel(props){
       case _=>s.toString
     }
   }
-    
+  
+  def batch(state:String)={
+    val con=getConnection
+    con.prepareStatement(state).executeUpdate
+  }
+  
   def insert(table:String,vals:Iterable[Array[Object]])={
     val con=getConnection
     val values=vals.map(v=>"("+v.map(s=>prepare(s)).mkString(",")+")").mkString(",")

@@ -19,4 +19,11 @@ http://www.espertech.com/schema/esper/esper-configuration-2.0.xsd">
     <map-property name="precipitation" class="double"/>    
   </java-util-map>
 </event-type>
+<engine-settings>
+  <defaults>
+    <threading>
+      <internal-timer enabled="true" msec-resolution="1"/>
+    </threading>
+  </defaults>
+</engine-settings>
 </esper-configuration>	

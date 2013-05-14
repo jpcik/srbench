@@ -1,5 +1,6 @@
 package eu.planetdata.srbench
 import es.upm.fi.oeg.siq.tools.ParameterUtils._
+import io.Source._
 import java.io.File
 import eu.planetdata.srbench.feed.LsdDataFeed
 import es.upm.fi.oeg.morph.esper.EsperServer
@@ -40,14 +41,42 @@ import com.hp.hpl.jena.rdf.model.RDFNode
 import com.hp.hpl.jena.rdf.model.Literal
 import com.hp.hpl.jena.rdf.model.Resource
 import play.api.libs.json.JsValue
+import es.upm.fi.oeg.morph.esper.Ping
+import es.upm.fi.oeg.morph.esper.Event
+import play.api.libs.json.JsNull
+import eu.planetdata.srbench.data.lsd.Observations
+import scala.slick.driver.PostgresDriver.simple._
+import java.util.Properties
+import eu.planetdata.srbench.data.lsd.LsdDB
 
 object SRBench {
   val logger = LoggerFactory.getLogger(this.getClass)  
   private def srbench(q:String)=loadQuery("queries/srbench/"+q)
   private val srbenchR2rml=new URI("mappings/srbench.ttl")
 
-  def main(args:Array[String]){    
-    val props=load(new File("conf/srbench.properties"))
+  import Database.threadLocalSession
+ 
+/*
+  def q(props:Properties)={
+Database.forURL(url=props.getProperty("jdbc.source.url"), 
+    user=props.getProperty("jdbc.source.user"),
+    password=props.getProperty("jdbc.source.password"),
+    prop=null,
+    driver = props.getProperty("jdbc.driver")) withSession {
+    logger.info("preinttt")
+    val q2 = for {
+  c <- Observations if c.airTemperature > 90d
+  //s <- Suppliers if s.id === c.supID
+} yield (c.samplingTime, c.stationId)
+q2 foreach println
+  }  }*/
+  
+  def main(args:Array[String]){
+    //val props1=load(this.getClass.getClassLoader.getResourceAsStream("config/morph.properties"))
+    //LsdDB.loadData(props1)
+    
+    val props=load(getClass.getResourceAsStream("/config/srbench.properties"))
+      //load(new File("conf/srbench.properties"))
     val esper=new EsperServer           
     val eval = new QueryEvaluator(props,esper.system)
     esper.startup    
@@ -59,13 +88,19 @@ object SRBench {
     //proxy.engine ! ListenQuery(query,actor)
     val query=props.getProperty("srbench.query")
     val pull=props.getProperty("srbench.pull").equals("true")
+    val serialize=props.getProperty("srbench.serialize")
     val interval=props.getProperty("srbench.pull.interval").toInt
     val maxtime=props.getProperty("srbench.maxtime").toInt
-    val o=new FileOutputStream("result.out")    
-    val rec=new CustomReceiver(Platform.currentTime,rate)
+    val o=new FileOutputStream("results/"+query+".json")    
+    val rec=new ResultsReceiver(Platform.currentTime,rate)
     //val init=Platform.currentTime
-
+/*
+    (1 to 50).foreach{i=>
+      proxy.engine ! Event("lsd_observations",null)
+    }*/
     
+    //q(props)
+
     if (pull){
       logger.info("pulling")
       val key=eval.registerQuery(srbench(query), srbenchR2rml)
@@ -79,15 +114,20 @@ object SRBench {
     else{
       logger.info("pushing")
       eval.listenToQuery(srbench(query),srbenchR2rml,rec)
+      logger.info("nowwiiiiii")
       feed.schedule
       rec.initTime
+      logger.info("nowwiiiiii")
       Thread.sleep(maxtime)
     }
       
     
     val end=Platform.currentTime
     esper.system.shutdown
-    rec.serializeAll(System.out)
+    if (serialize.equals("json"))
+      rec.jsonize(o)
+    else
+      rec.serializeAll(System.out)
     
     //rec.jsonize(o)
     o.close
@@ -96,34 +136,3 @@ object SRBench {
 }
 
 
-class CustomReceiver(start:Long,rate:Long) extends StreamReceiver{
-  private val logger=LoggerFactory.getLogger(this.getClass)
-  private val allResults=new ArrayBuffer[(Long,SparqlResults)]()
-  private val rounding=(rate).toDouble
-  var stTime=0L
-  
-  def initTime{
-    stTime=Platform.currentTime
-  }
-  
-  override def receiveData(s:SparqlResults){
-    logger.debug("got at: "+(Platform.currentTime-stTime))
-    //Utils.print(logger, Platform.currentTime-start,System.out, s)
-    val orig=Platform.currentTime-stTime
-    val timed:Long = (Math.round(orig/rounding)*rounding).toLong
-    //logger.info("times: "+orig+" "+timed)
-    allResults.+= ((timed,s))
-  }
-  
-  def serializeAll(o:OutputStream)=allResults.foreach{p=>
-    IOUtils.print(p._1,o,p._2)
-  }
-
-  def jsonize(o:OutputStream)={
-    val tt:Seq[JsValue]=allResults.map(r=>IOUtils.json(r._1,r._2)).toSeq
-    
-    val js=Json.toJson(Map("results"->toJson(tt)))
-    o.write(Json.stringify(js).getBytes)
-  }
-
-}

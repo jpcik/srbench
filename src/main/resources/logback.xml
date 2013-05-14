@@ -8,8 +8,10 @@
 	
 	<logger name="es.upm.fi.oeg.morph" level="DEBUG" />
 	<logger name="es.upm.fi.oeg.morph.stream.esper.EsperResultSet" level="INFO" />
-	<logger name="eu.planetdata.srbench" level="TRACE" />
-	
+	<logger name="es.upm.fi.oeg.morph.stream.translate" level="INFO" />
+	<logger name="eu.planetdata.srbench" level="DEBUG" />
+	<logger name="eu.planetdata.srbench.feed" level="TRACE" />
+
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
