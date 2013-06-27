@@ -1,5 +1,4 @@
 package eu.planetdata.srbench
-import es.upm.fi.oeg.siq.tools.ParameterUtils._
 import io.Source._
 import java.io.File
 import eu.planetdata.srbench.feed.LsdDataFeed
@@ -48,10 +47,11 @@ import eu.planetdata.srbench.data.lsd.Observations
 import scala.slick.driver.PostgresDriver.simple._
 import java.util.Properties
 import eu.planetdata.srbench.data.lsd.LsdDB
+import es.upm.fi.oeg.siq.tools.ParameterUtils
 
 object SRBench {
   val logger = LoggerFactory.getLogger(this.getClass)  
-  private def srbench(q:String)=loadQuery("queries/srbench/"+q)
+  private def srbench(q:String)=ParameterUtils.loadQuery("queries/srbench/"+q)
   private val srbenchR2rml=new URI("mappings/srbench.ttl")
 
   import Database.threadLocalSession
@@ -75,7 +75,7 @@ q2 foreach println
     //val props1=load(this.getClass.getClassLoader.getResourceAsStream("config/morph.properties"))
     //LsdDB.loadData(props1)
     
-    val props=load(getClass.getResourceAsStream("/config/srbench.properties"))
+    val props=ParameterUtils.load(getClass.getResourceAsStream("/config/srbench.properties"))
       //load(new File("conf/srbench.properties"))
     val esper=new EsperServer           
     val eval = new QueryEvaluator(props,esper.system)

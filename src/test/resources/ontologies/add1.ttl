@@ -1,0 +1,5 @@
+@prefix ssn: <http://purl.oclc.org/NET/ssnx/ssn#> . 
+@prefix oeg-sen: <http://oeg-upm.net/onto/sensordemo/> .
+@base <http://oeg-upm.net/data/observations#> .
+:obs1 a oeg-sen:TemperatureObservation;
+      ssn:datacosa "342".
