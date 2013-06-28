@@ -1,0 +1,6 @@
+SELECT DISTINCT ?humval 
+  FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 1 HOURS]
+	WHERE {
+	 ?obsval ssn:featureOfInterest [a cf-feature:Humidity];
+	 ssn:observationResult [ssn:hasValue [qu:numericalValue ?humval]].
+	}
