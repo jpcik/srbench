@@ -23,10 +23,10 @@
      xmlns:cf-property="http://purl.oclc.org/NET/ssnx/cf/cf-property#"
      xmlns:ssn="http://purl.oclc.org/NET/ssnx/ssn#"
      xmlns:dim="http://purl.oclc.org/NET/ssnx/qu/dim#"
+     xmlns:aws="http://purl.oclc.org/NET/ssnx/meteo/aws#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:unit="http://purl.oclc.org/NET/ssnx/qu/unit#"
      xmlns:oeg-sen="http://oeg-upm.net/onto/sensordemo/"
-     xmlns:aws="http://purl.oclc.org/NET/ssnx/meteo/aws#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -34,6 +34,17 @@
      xmlns:quantity="http://purl.oclc.org/NET/ssnx/qu/quantity#"
      xmlns:cf-feature="http://purl.oclc.org/NET/ssnx/cf/cf-feature#">
     <owl:Ontology rdf:about="http://oeg-upm.net/onto/sensordemo/"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
     
 
 
@@ -274,14 +285,14 @@
         <rdfs:subClassOf rdf:resource="&ssn;Observation"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;observedProperty"/>
-                <owl:someValuesFrom rdf:resource="&dim;Temperature"/>
+                <owl:onProperty rdf:resource="&ssn;observedBy"/>
+                <owl:someValuesFrom rdf:resource="&aws;TemperatureSensor"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;observedBy"/>
-                <owl:someValuesFrom rdf:resource="&aws;TemperatureSensor"/>
+                <owl:onProperty rdf:resource="&ssn;observedProperty"/>
+                <owl:someValuesFrom rdf:resource="&dim;Temperature"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -308,14 +319,14 @@
         <rdfs:subClassOf rdf:resource="&ssn;Observation"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;observedProperty"/>
-                <owl:someValuesFrom rdf:resource="&dim;VelocityOrSpeed"/>
+                <owl:onProperty rdf:resource="&ssn;featureOfInterest"/>
+                <owl:someValuesFrom rdf:resource="&cf-feature;Wind"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;featureOfInterest"/>
-                <owl:someValuesFrom rdf:resource="&cf-feature;Wind"/>
+                <owl:onProperty rdf:resource="&ssn;observedProperty"/>
+                <owl:someValuesFrom rdf:resource="&dim;VelocityOrSpeed"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -632,7 +643,18 @@
 
     <!-- http://purl.oclc.org/NET/ssnx/qu/qu#QuantityKind -->
 
-    <owl:Class rdf:about="&qu;QuantityKind"/>
+    <owl:Class rdf:about="&qu;QuantityKind">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="&qu;quantityKind"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </owl:equivalentClass>
+    </owl:Class>
     
 
 
@@ -642,13 +664,13 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&qu;quantityKind"/>
-                <owl:someValuesFrom rdf:resource="&qu;QuantityKind"/>
+                <owl:allValuesFrom rdf:resource="&qu;QuantityKind"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&qu;quantityKind"/>
-                <owl:allValuesFrom rdf:resource="&qu;QuantityKind"/>
+                <owl:someValuesFrom rdf:resource="&qu;QuantityKind"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -677,16 +699,22 @@
     <!-- http://purl.oclc.org/NET/ssnx/ssn#Observation -->
 
     <owl:Class rdf:about="&ssn;Observation">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&ssn;observedBy"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </owl:equivalentClass>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;featureOfInterest"/>
-                <owl:someValuesFrom rdf:resource="&ssn;FeatureOfInterest"/>
+                <owl:onProperty rdf:resource="&ssn;observedBy"/>
+                <owl:someValuesFrom rdf:resource="&ssn;Sensor"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;observedProperty"/>
-                <owl:someValuesFrom rdf:resource="&ssn;Property"/>
+                <owl:onProperty rdf:resource="&ssn;featureOfInterest"/>
+                <owl:someValuesFrom rdf:resource="&ssn;FeatureOfInterest"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -697,8 +725,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;observedBy"/>
-                <owl:someValuesFrom rdf:resource="&ssn;Sensor"/>
+                <owl:onProperty rdf:resource="&ssn;observedProperty"/>
+                <owl:someValuesFrom rdf:resource="&ssn;Property"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -720,7 +748,18 @@
 
     <!-- http://purl.oclc.org/NET/ssnx/ssn#Property -->
 
-    <owl:Class rdf:about="&ssn;Property"/>
+    <owl:Class rdf:about="&ssn;Property">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty>
+                    <rdf:Description>
+                        <owl:inverseOf rdf:resource="&ssn;observedProperty"/>
+                    </rdf:Description>
+                </owl:onProperty>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </owl:equivalentClass>
+    </owl:Class>
     
 
 
@@ -751,14 +790,14 @@
     <owl:Class rdf:about="&ssn;SensorOutput">
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;hasValue"/>
-                <owl:someValuesFrom rdf:resource="&ssn;ObservationValue"/>
+                <owl:onProperty rdf:resource="&ssn;isProducedBy"/>
+                <owl:someValuesFrom rdf:resource="&ssn;Sensor"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&ssn;isProducedBy"/>
-                <owl:someValuesFrom rdf:resource="&ssn;Sensor"/>
+                <owl:onProperty rdf:resource="&ssn;hasValue"/>
+                <owl:someValuesFrom rdf:resource="&ssn;ObservationValue"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -1158,20 +1197,6 @@
      -->
 
     <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&ssn;ObservationValue"/>
-        <owl:onProperty>
-            <rdf:Description>
-                <owl:inverseOf rdf:resource="&ssn;hasValue"/>
-            </rdf:Description>
-        </owl:onProperty>
-        <owl:someValuesFrom rdf:resource="&ssn;SensorOutput"/>
-    </owl:Restriction>
-    <owl:Restriction>
-        <rdfs:subClassOf rdf:resource="&ssn;Observation"/>
-        <owl:onProperty rdf:resource="&ssn;observedProperty"/>
-        <owl:someValuesFrom rdf:resource="&ssn;Property"/>
-    </owl:Restriction>
-    <owl:Restriction>
         <rdfs:subClassOf rdf:resource="&ssn;SensorOutput"/>
         <owl:onProperty>
             <rdf:Description>
@@ -1185,9 +1210,28 @@
         <owl:onProperty rdf:resource="&ssn;observedBy"/>
         <owl:someValuesFrom rdf:resource="&aws;TemperatureSensor"/>
     </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&ssn;Observation"/>
+        <owl:onProperty rdf:resource="&ssn;observedProperty"/>
+        <owl:someValuesFrom rdf:resource="&ssn;Property"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&ssn;ObservationValue"/>
+        <owl:onProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="&ssn;hasValue"/>
+            </rdf:Description>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="&ssn;SensorOutput"/>
+    </owl:Restriction>
+    <owl:Restriction>
+        <rdfs:subClassOf rdf:resource="&ssn;Observation"/>
+        <owl:onProperty rdf:resource="&ssn;observationResult"/>
+        <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+    </owl:Restriction>
 </rdf:RDF>
 
 
 
-<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+<!-- Generated by the OWL API (version 3.2.3.1824) http://owlapi.sourceforge.net -->
 
