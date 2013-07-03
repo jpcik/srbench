@@ -7,6 +7,6 @@ PREFIX oeg-sen: <http://oeg-upm.net/onto/sensordemo/>
 SELECT DISTINCT ?obsval  ?humval 
 FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 1 HOURS]
 WHERE {
- ?obsval ssn:observedBy [a aws:HumiditySensor];
- ssn:observationResult [ssn:hasValue [qu:numericalValue ?humval]].
+  ?obsval ssn:observedBy [a aws:HumiditySensor];
+  ssn:observationResult [ssn:hasValue [qu:numericalValue ?humval]].
 }

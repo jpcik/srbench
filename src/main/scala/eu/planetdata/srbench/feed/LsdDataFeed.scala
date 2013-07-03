@@ -19,13 +19,13 @@ class LsdDataFeed(props:Properties,val proxy:EsperProxy) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val rate=props.getProperty("feed.rate").toLong
   private val interval=5
-  private val window=180
-  private val dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
-  private val startTime=dateFormat.parse(props.getProperty("feed.starttime"))
-  private val attributes=props.getProperty("feed.attnames").split(',')
-  private val dbattributes=Array("samplingtime","st.stationid","airtemperature","relativehumidity","windspeed","precipitation","to_char(samplingtime AT TIME ZONE INTERVAL '4:00' HOUR TO MINUTE, 'YYYY\"_\"MM\"_\"DD\"_\"HH\"_\"MI\"_\"SS')","st.code")
-  val projatts=dbattributes.zip(attributes).map(a=>a._1+" AS "+a._2).mkString(",")
-  private val conditions=props.getProperty("feed.conditions").split(',').mkString(" and ")
+  protected val window=180
+  protected val dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
+  protected val startTime=dateFormat.parse(props.getProperty("feed.starttime"))
+  protected val attributes=props.getProperty("feed.attnames").split(',')
+  protected val dbattributes=Array("samplingtime","st.stationid","airtemperature","relativehumidity","windspeed","precipitation","to_char(samplingtime AT TIME ZONE INTERVAL '4:00' HOUR TO MINUTE, 'YYYY\"_\"MM\"_\"DD\"_\"HH\"_\"MI\"_\"SS')","st.code")
+  lazy val projatts=dbattributes.zip(attributes).map(a=>a._1+" AS "+a._2).mkString(",")
+  protected val conditions=props.getProperty("feed.conditions").split(',').mkString(" and ")
   
   def getData(date:Date)={
     val db=new Rdb(props)

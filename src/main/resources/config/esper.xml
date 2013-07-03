@@ -19,6 +19,17 @@ http://www.espertech.com/schema/esper/esper-configuration-2.0.xsd">
     <map-property name="precipitation" class="double"/>    
   </java-util-map>
 </event-type>
+<event-type name="crtm_observations">
+  <java-util-map>
+    <map-property name="serie" class="string"/>
+    <map-property name="lineid" class="int"/>
+    <map-property name="timeformat" class="string"/>
+    <map-property name="observationTime" class="string"/>
+    <map-property name="stopid" class="int"/>    
+    <map-property name="result" class="string"/>    
+    <map-property name="operator" class="string"/>    
+  </java-util-map>
+</event-type>
 <engine-settings>
   <defaults>
     <threading>
