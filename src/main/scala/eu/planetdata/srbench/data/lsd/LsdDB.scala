@@ -10,7 +10,7 @@ object LsdDB {
   def loadData(props:Properties)={
     println("yahoooooooo")
     //val state=fromInputStream(getClass.getResourceAsStream("/db/create.sql")).mkString
-    val db=new Rdb(props)
+    val db=new Rdb("lsd")
     val tt=db.query("select count(*) as numb from observation ", Array("numb"))
     tt._1.foreach(a=>println(a.mkString))
     //db.batch(state)

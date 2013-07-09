@@ -5,9 +5,9 @@ PREFIX aws: <http://purl.oclc.org/NET/ssnx/meteo/aws#>
 PREFIX oeg-sen: <http://oeg-upm.net/onto/sensordemo/>
 PREFIX cf-feature: <http://purl.oclc.org/NET/ssnx/cf/cf-feature#>
 
-SELECT DISTINCT ?humval 
-  FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 1 HOURS]
-	WHERE {
-	 ?obsval ssn:featureOfInterest [a cf-feature:Humidity];
-	 ssn:observationResult [ssn:hasValue [qu:numericalValue ?humval]].
-	}
+SELECT DISTINCT ?obs 
+FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 1 HOURS]
+WHERE {  
+ ?obs ssn:observedBy [a aws:TemperatureSensor].
+ ?obs ssn:observationResult [ssn:hasValue [qu:unit [a dim:TemperatureUnit]]].
+}

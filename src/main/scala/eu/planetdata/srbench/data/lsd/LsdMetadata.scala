@@ -49,7 +49,7 @@ object LsdMetadata extends RdfNavigate{
   def main(atgs:Array[String]){
     val metadataDir=new File("/media/Add/data/lsd/metadta/")
     val props=load(new File("conf/srbench.properties"))
-    val db=new Rdb(props) 
+    val db=new Rdb("lsd") 
     
     metadataDir.listFiles.filter(f=>f.getName.endsWith(".n3")).foreach{f=>
       val model=ModelFactory.createDefaultModel

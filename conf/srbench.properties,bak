@@ -8,16 +8,13 @@ siq.adapter.esper.query = es.upm.fi.oeg.morph.stream.esper.EsperQuery
 siq.adapter.esper.evaluator = es.upm.fi.oeg.morph.stream.esper.EsperAdapter
 siq.adapter.esper.url = akka://esperkernel/user/EsperEngine
 
-siq.rewriter = es.upm.fi.oeg.morph.stream.rewriting.ExpansionQueryRewritinggg
-
-feed.rate = 500
-feed.attnames = serie,lineid,timeformat,\
-                observationTime,stopid,result,operator
-feed.starttime = 2011-06-01 06:00:00+0200
-feed.conditions = 
-#and st.stationid < 3500
-#,st.stationid<=3200
-#                  samplingtime<'2004-08-08 08:55:00+2:00'                
+feed.rate = 1000
+feed.attnames = observationTime,stationId,temperature,\
+                relativeHumidity,precipitation,timeformat,code
+feed.starttime = 2004-08-08 06:00:00+0200
+feed.conditions = st.stationid>=3000,\
+                  st.stationid<=3200,\
+                  samplingtime<'2004-08-08 08:55:00+02'                
                          
 srbench.serialize = json
 srbench.query = q7.sparql

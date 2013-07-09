@@ -15,6 +15,7 @@ import es.upm.fi.oeg.morph.stream.evaluate.EvaluatorUtils
 import eu.planetdata.srbench.feed.LsdDataFeed
 import es.upm.fi.oeg.morph.esper.EsperProxy
 import org.junit.After
+import eu.planetdata.srbench.feed.DataFeed
 
 class RewritingExecutionTest extends JUnitSuite with ShouldMatchersForJUnit {
   private val logger= LoggerFactory.getLogger(this.getClass)
@@ -22,7 +23,7 @@ class RewritingExecutionTest extends JUnitSuite with ShouldMatchersForJUnit {
   val props = ParameterUtils.load(getClass.getClassLoader.getResourceAsStream("config/srbench.properties"))
   val eval = new QueryEvaluator(props,esper.system)
   val proxy=new EsperProxy(esper.system)
-  val feed=new LsdDataFeed(props,proxy)
+  val feed=new DataFeed("lsd",proxy)
 
   private def ssn(q:String)=ParameterUtils.loadQuery("queries/ssn/"+q)
   private val srbenchR2rml=new URI("mappings/srbench.ttl")
@@ -37,10 +38,10 @@ class RewritingExecutionTest extends JUnitSuite with ShouldMatchersForJUnit {
 
   @Test def filterUriDiff{
     val res= new ResultsReceiver(0,0) 
-    val qid=eval.listenToQuery(ssn("q9.sparql"),ssnR2rml,res)
+    val qid=eval.listenToQuery(ssn("q11.sparql"),ssnR2rml,res)
     feed.schedule
     Thread.sleep(20000)
-    logger.info("obs processed "+feed.countAll)
+    //logger.info("obs processed "+feed.countAll)
   }
 
   @After def finish{
@@ -52,7 +53,7 @@ class ResultsReceiver (start:Long,rate:Long) extends StreamReceiver{
   private val logger=LoggerFactory.getLogger(this.getClass)
   
   override def receiveData(s:SparqlResults){    
-   // logger.info(EvaluatorUtils.serialize(s))
+    //logger.info(EvaluatorUtils.serialize(s))
   }
   
 }

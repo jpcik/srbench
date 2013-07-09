@@ -25,7 +25,7 @@ object LsdObservations extends RdfNavigate{
     val subset="charley"
     val obsDir=new File("/media/Add/data/lsd/observations/"+subset)
     val props=load(new File("conf/srbench.properties"))
-    val db=new Rdb(props) 
+    val db=new Rdb("lsd") 
     
     obsDir.listFiles.filter(f=>f.getName.endsWith(".n3")).drop(48180).take(5000).foreach{f=>
       val code=f.getName.split('_').head

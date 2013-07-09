@@ -7,6 +7,7 @@ import com.hp.hpl.jena.datatypes.xsd.XSDDatatype
 import org.postgresql.util.PSQLException
 import java.sql.Connection
 import java.sql.ResultSet
+import com.typesafe.config.ConfigFactory
 
 class QueryConnection(con:Connection,res:ResultSet){
   def close{
@@ -15,7 +16,11 @@ class QueryConnection(con:Connection,res:ResultSet){
   }
 }
 
-class Rdb(props:Properties) extends JDBCRelationalModel(props){
+class Rdb(key:String) {
+  val conf=ConfigFactory.load.getConfig(key+".jdbc")
+  val (sourceUrl,user,password)=(conf.getString("source.url"),conf.getString("source.user"),
+      conf.getString("source.password"))
+  
   private def getConnection=
       DriverManager.getConnection(sourceUrl,user,password)
   

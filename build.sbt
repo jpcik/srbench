@@ -9,14 +9,12 @@ scalaVersion := "2.10.1"
 crossPaths := false
 
 libraryDependencies ++= Seq(
-  "es.upm.fi.oeg.morph.streams" % "esper-engine" % "1.0.1",
-  "es.upm.fi.oeg.morph.streams" % "stream-reasoning" % "1.0.1",
+  "com.typesafe" % "config" % "1.0.2",
   "com.typesafe.slick" %% "slick" % "1.0.0",  
   "ch.qos.logback" % "logback-classic" % "1.0.9",
-  "es.upm.fi.oeg.morph" % "kyrie" % "0.18.1",
-  "es.upm.fi.oeg.morph" % "sparql-stream" % "1.0.3",
-  "es.upm.fi.oeg.morph.streams" % "adapter-esper" % "1.0.6",
-  "es.upm.fi.oeg.morph" % "query-rewriting" % "1.0.6",
+  "es.upm.fi.oeg.morph.streams" % "stream-reasoning" % "1.0.2",
+  "es.upm.fi.oeg.morph.streams" % "adapter-esper" % "1.0.7",
+  "es.upm.fi.oeg.morph" % "query-rewriting" % "1.0.7",
   "eu.trowl" % "trowl-core" % "1.2",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",

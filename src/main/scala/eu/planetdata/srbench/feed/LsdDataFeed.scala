@@ -18,7 +18,7 @@ import scala.language.postfixOps
 class LsdDataFeed(props:Properties,val proxy:EsperProxy) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val rate=props.getProperty("feed.rate").toLong
-  private val interval=5
+  protected val interval=5
   protected val window=180
   protected val dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
   protected val startTime=dateFormat.parse(props.getProperty("feed.starttime"))
@@ -28,7 +28,7 @@ class LsdDataFeed(props:Properties,val proxy:EsperProxy) {
   protected val conditions=props.getProperty("feed.conditions").split(',').mkString(" and ")
   
   def getData(date:Date)={
-    val db=new Rdb(props)
+    val db=new Rdb("lsd")
     val dateStr=dateFormat.format(date)
     val dateEnd=new DateTime(date).plusMinutes(window).toDate
     val datefin=dateFormat.format(dateEnd)

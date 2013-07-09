@@ -37,7 +37,7 @@ class CrtmData {
   
   def readFiles(dir:String)={ 
     val props=ParameterUtils.load(new File("conf/srbench.properties"))
-    val db=new Rdb(props)
+    val db=new Rdb("crtm")
     val directory=new File(dir)
     if (!directory.isDirectory)
       throw new IllegalArgumentException("not a directory: "+dir)
