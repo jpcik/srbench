@@ -31,12 +31,40 @@
 
 :tempObs a rr:TriplesMap; rr:logicalTable :wundtable;
   rr:subjectMap   [ rr:template "http://meteo.us/{code}/temperature/observation/{timeformat}"; 
-                    rr:class oeg-sen:TemperatureObservation; rr:graph srbench:observations ];
+                    rr:class oeg-sen:AirTemperatureObservation; rr:graph srbench:observations ];
   rr:predicateObjectMap [ rr:predicate ssn:observationResult;
                           rr:objectMap [ rr:parentTriplesMap :tempObsResult; rr:joinCondition :joinstation ]];
-  rr:predicateObjectMap [ rr:predicate ssn:observedBy; rr:objectMap [ rr:template "http://meteo.us/sensor/id/{stationId}_sens"] ];
+  rr:predicateObjectMap [ rr:predicate ssn:observnedBy; rr:objectMap [ rr:template "http://meteo.us/sensor/id/{stationId}_sens"] ];
   rr:predicateObjectMap [ rr:predicate ssn:observedProperty; rr:object cf-property:air_temperature ];
+  rr:predicateObjectMap [ rr:predicate oeg-sen:sendingTime; rr:column "sendingTime" ];
+  
 .   
+
+:stempObsValue a rr:TriplesMap; rr:logicalTable :wundtable;
+  rr:subjectMap   [ rr:template "http://meteo.us/{code}/soiltemperature/observationvalue/{timeformat}"; 
+                    rr:class ssn:ObservationValue; rr:graph srbench:observations ];
+  rr:predicateObjectMap [ rr:predicate qu:numericalValue; rr:objectMap	[ rr:column "soilTemperature" ] ];     		   		  
+  rr:predicateObjectMap [ rr:predicate qu:unit; rr:object unit:degreeCelsius  ];     		   		  
+.
+
+:stempObsResult a rr:TriplesMap; rr:logicalTable :wundtable;
+  rr:subjectMap   [ rr:template "http://meteo.us/{code}/soiltemperature/observationresult/{timeformat}"; 
+                    rr:class ssn:SensorOutput; rr:graph srbench:observations ];
+  rr:predicateObjectMap [ rr:predicate ssn:hasValue; 
+                          rr:objectMap	[ rr:parentTriplesMap :stempObsValue; rr:joinCondition :joinstation ] ];     		   		  
+.
+
+:stempObs a rr:TriplesMap; rr:logicalTable :wundtable;
+  rr:subjectMap   [ rr:template "http://meteo.us/{code}/soiltemperature/observation/{timeformat}"; 
+                    rr:class oeg-sen:SoilTemperoatureObservation; rr:graph srbench:observations ];
+  rr:predicateObjectMap [ rr:predicate ssn:observationResult;
+                          rr:objectMap [ rr:parentTriplesMap :stempObsResult; rr:joinCondition :joinstation ]];
+  rr:predicateObjectMap [ rr:predicate ssn:obsebrvedBy; rr:objectMap [ rr:template "http://meteo.us/sensor/id/{stationId}_sens"] ];
+  rr:predicateObjectMap [ rr:predicate ssn:observedProperty; rr:object cf-property:soil_temperature ];
+  rr:predicateObjectMap [ rr:predicate oeg-sen:sendingTime; rr:column "sendingTime" ];
+  
+.   
+
 
 :humObsValue a rr:TriplesMap; rr:logicalTable :wundtable;
   rr:subjectMap   [ rr:template "http://meteo.us/{code}/humidity/observationvalue/{timeformat}"; 
@@ -54,10 +82,11 @@
 
 :humObs a rr:TriplesMap; rr:logicalTable :wundtable;
   rr:subjectMap   [ rr:template "http://meteo.us/{code}/humidity/observation/{timeformat}"; 
-                    rr:class oeg-sen:HumidityObservation; rr:graph srbench:observations ];
+                    rr:class oeg-sen:RelativeHumidityObservation; rr:graph srbench:observations ];
   rr:predicateObjectMap [ rr:predicate ssn:observationResult;
                           rr:objectMap [ rr:parentTriplesMap :humObsResult; rr:joinCondition :joinstation ]];
   rr:predicateObjectMap [ rr:predicate ssn:observedBy; rr:objectMap [ rr:template "http://meteo.us/sensor/id/{stationId}_sens"] ];
   rr:predicateObjectMap [ rr:predicate ssn:observedProperty; rr:object cf-property:relative_humidity ];
+  rr:predicateObjectMap [ rr:predicate oeg-sen:sendingTime; rr:column "sendingTime" ];
 .   
  

@@ -1,8 +1,10 @@
+import AssemblyKeys._
+
 name := "srbench"
 
 organization := "eu.planetdata"
 
-version := "1.0.1"
+version := "1.0.2"
 
 scalaVersion := "2.10.1"
 
@@ -12,9 +14,8 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.0.2",
   "com.typesafe.slick" %% "slick" % "1.0.0",  
   "ch.qos.logback" % "logback-classic" % "1.0.9",
-  "es.upm.fi.oeg.morph.streams" % "stream-reasoning" % "1.0.2",
-  "es.upm.fi.oeg.morph.streams" % "adapter-esper" % "1.0.7",
-  "es.upm.fi.oeg.morph" % "query-rewriting" % "1.0.7",
+  "es.upm.fi.oeg.morph.streams" % "adapter-esper" % "1.0.8",
+  //"es.upm.fi.oeg.morph" % "query-rewriting" % "1.0.8",
   "eu.trowl" % "trowl-core" % "1.2",
   "postgresql" % "postgresql" % "9.1-901.jdbc4",
   "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
@@ -48,3 +49,16 @@ unmanagedSourceDirectories in Compile <<= (scalaSource in Compile)(Seq(_))
 
 unmanagedSourceDirectories in Test <<= (scalaSource in Test)(Seq(_))
 
+retrieveManaged := true
+
+assemblySettings
+
+test in assembly := {}
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case "logback.xml" => MergeStrategy.first
+    case "unwanted.txt"     => MergeStrategy.discard
+    case x => old(x)
+  }
+}

@@ -20,8 +20,8 @@ import eu.planetdata.srbench.feed.DataFeed
 class RewritingExecutionTest extends JUnitSuite with ShouldMatchersForJUnit {
   private val logger= LoggerFactory.getLogger(this.getClass)
   lazy val esper=new EsperServer
-  val props = ParameterUtils.load(getClass.getClassLoader.getResourceAsStream("config/srbench.properties"))
-  val eval = new QueryEvaluator(props,esper.system)
+  //val props = ParameterUtils.load(getClass.getClassLoader.getResourceAsStream("config/srbench.properties"))
+  val eval = new QueryEvaluator("srbench")
   val proxy=new EsperProxy(esper.system)
   val feed=new DataFeed("lsd",proxy)
 
@@ -53,7 +53,7 @@ class ResultsReceiver (start:Long,rate:Long) extends StreamReceiver{
   private val logger=LoggerFactory.getLogger(this.getClass)
   
   override def receiveData(s:SparqlResults){    
-    //logger.info(EvaluatorUtils.serialize(s))
+    logger.info(EvaluatorUtils.serialize(s))
   }
   
 }

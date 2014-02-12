@@ -78,7 +78,7 @@ q2 foreach println
     val props=ParameterUtils.load(getClass.getResourceAsStream("/config/srbench.properties"))
       //load(new File("conf/srbench.properties"))
     val esper=new EsperServer           
-    val eval = new QueryEvaluator(props,esper.system)
+    val eval = new QueryEvaluator("srbench")
     esper.startup    
     val proxy=new EsperProxy(esper.system)
     val feed=new LsdDataFeed(props,proxy)
@@ -113,7 +113,7 @@ q2 foreach println
     }
     else{
       logger.info("pushing")
-      eval.listenToQuery(srbench(query),srbenchR2rml,rec)
+      eval.listenToQuery(srbench(query),srbenchR2rml,null)
       logger.info("nowwiiiiii")
       feed.schedule
       rec.initTime

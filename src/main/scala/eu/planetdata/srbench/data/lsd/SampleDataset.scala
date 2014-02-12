@@ -10,14 +10,15 @@ import java.io.File
 import es.upm.fi.oeg.morph.voc.RDFFormat
 import collection.JavaConversions._
 import java.io.FileOutputStream
+import com.typesafe.config.ConfigFactory
 
 class SampleDataset {
   def generate={
     
-    val props = load(new File("conf/srbench.properties"))
+    val props = ConfigFactory.load.getConfig("jdbc")
     val relat:RelationalModel=new JDBCRelationalModel(props)
     val reader=R2rmlReader("mappings/lsd.ttl")
-    val ds=new RdfGenerator(reader,relat).generate
+    val ds=new RdfGenerator(reader,relat,"").generate
     
     ds.listNames.toArray.sorted.zipWithIndex.foreach{name=>
       val fos=new FileOutputStream("data_"+name._2+".ttl")

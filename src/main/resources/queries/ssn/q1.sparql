@@ -2,7 +2,8 @@ PREFIX ssn: <http://purl.oclc.org/NET/ssnx/ssn#>
 PREFIX qu: <http://purl.oclc.org/NET/ssnx/qu/qu#>
 
 SELECT DISTINCT ?observation   
-FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 1 HOURS]
+FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 100 MS SLIDE 100 MS]
 WHERE {
   ?observation ssn:observedBy ?sensor;
+# ?observation a ssn:Observation.
 }

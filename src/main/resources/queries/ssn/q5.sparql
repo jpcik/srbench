@@ -5,7 +5,7 @@ PREFIX qu: <http://purl.oclc.org/NET/ssnx/qu/qu#>
 PREFIX dim: <http://purl.oclc.org/NET/ssnx/qu/dim#>
 
 SELECT DISTINCT ?observation   
-FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 1 HOURS]
+FROM NAMED STREAM <http://cwi.nl/SRBench/observations> [NOW - 100 MS SLIDE 100 MS]
 WHERE {
  ?observation ssn:observedProperty [a dim:Temperature].  
 }

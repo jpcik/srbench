@@ -16,7 +16,7 @@ import org.joda.time.DateTime
 
 
 class DataFeed(key:String,proxy:EsperProxy) {
-  val conf=ConfigFactory.load().getConfig(key)
+  val conf=ConfigFactory.load getConfig(key)  
   private val logger = LoggerFactory.getLogger(this.getClass)
   
   protected val dateFormat=new SimpleDateFormat(conf.getString("feed.dateformat"))
@@ -29,6 +29,7 @@ class DataFeed(key:String,proxy:EsperProxy) {
   val streamname=conf.getString("feed.streamname")
   val querytemplate=conf.getString("feed.querytemplate")
   lazy val projatts=dbattributes.zip(attributes).map(a=>a._1+" AS "+a._2).mkString(",")
+  var datain,groupsize,totalgroups=0L
   
   type EsperEvent=Map[String,Any]
   
@@ -40,14 +41,15 @@ class DataFeed(key:String,proxy:EsperProxy) {
     proxy.system.scheduler.schedule(0 seconds, rating milliseconds){
       val dnext=datas.next
       if (dnext!=null){
-        logger.trace((Platform.currentTime-init)+" sendingo "+rating+"-"+dnext._1)
+        if (logger.isTraceEnabled)
+          logger.trace((Platform.currentTime-init)+" sendingo "+rating+"-"+dnext._1)
       
         val data:Seq[EsperEvent]=dnext._2
-        //println(data.size)
-        //println("sending event "+ data.head("observationTime"))
-
+        totalgroups+=1
+        groupsize+=data.size
         data.foreach{d=>
-          eng ! Event(streamname,d)          
+          //d.put("internalTime",Platform.currentTime)
+          eng ! Event(streamname,d+("sendingTime"->Platform.currentTime))               
         }
       }
     }      
@@ -70,18 +72,14 @@ class DataFeed(key:String,proxy:EsperProxy) {
     logger.debug("query done")
 
     def divide(t:Object,ini:Long,lapse:Long)={
-      //println((t.asInstanceOf[Timestamp].getTime-ini)+" "+lapse)
-      val tt=(t.asInstanceOf[Timestamp].getTime-ini)/lapse
-      //println(tt)
-      tt
+      (t.asInstanceOf[Timestamp].getTime-ini)/lapse      
     }
     
     val grouped=res.groupBy(a=>divide(a(0),date.getTime,grouping)).map{v=>      
-      val key=v._1.toString//dateFormat.format(v._1.asInstanceOf[Timestamp])   
-      
+      val key=v._1.toString//dateFormat.format(v._1.asInstanceOf[Timestamp])         
       (key,v._2.map(dt=>attributes.zip(dt).toMap[String,Any]).toSeq  )
     }    
-    logger.debug("grouping done")
+    //logger.debug("grouping done")
     con.close
 
     
@@ -96,7 +94,8 @@ class DataFeed(key:String,proxy:EsperProxy) {
   class CrtmDataIterator extends Iterator[(String,Seq[EsperEvent])]{
     val start=startTime
     val cache=new Queue[(String,Seq[EsperEvent])]
-    cache++=getData(start)
+    val initial=getData(start)
+    cache++=initial
     var lastDate=new DateTime(start)
     //println("keys init "+cache.map(i=>i._1).mkString)
     
@@ -105,11 +104,11 @@ class DataFeed(key:String,proxy:EsperProxy) {
       val head=try cache.dequeue
       catch {case e:NoSuchElementException=>null}
       if (cache.size<=3 && !proxy.system.isTerminated && !cache.isEmpty ){
-        logger.info("Load the cache")
+        logger.debug("Load the cache")
         import proxy.system.dispatcher
         try proxy.system.scheduler.scheduleOnce(0 seconds){          
           val newDate=lastDate.plusMinutes(interval)
-          val gedata=getData(newDate.toDate)
+          val gedata=initial//getData(newDate.toDate)
           lastDate=newDate
           cache++=gedata
 

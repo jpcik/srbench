@@ -12,8 +12,9 @@
 	<logger name="es.upm.fi.oeg.morph.stream.esper.EsperResultSet" level="INFO" />
 	<logger name="es.upm.fi.oeg.morp.esper.EsperEngine" level="TRACE" />
 	<logger name="es.upm.fi.oeg.morph.stream.translate" level="INFO" />
+	<logger name="es.upm.fi.oeg.morph.stream.rewriting.SparqlClausifier" level="TRACE" />
 	<logger name="eu.planetdata.srbench" level="DEBUG" />
-	<logger name="eu.planetdata.srbench.feed" level="TRACE" />
+	<logger name="eu.planetdata.srbench.feed" level="DEBUG" />
 
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />

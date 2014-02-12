@@ -21,8 +21,8 @@ import akka.actor.Props
 class CrtmStreamingTest extends JUnitSuite with ShouldMatchersForJUnit {
   private val logger= LoggerFactory.getLogger(this.getClass)
   lazy val esper=new EsperServer
-  val props = ParameterUtils.load(getClass.getClassLoader.getResourceAsStream("config/srbench.properties"))
-  val eval = new QueryEvaluator(props,esper.system)
+  //val props = ParameterUtils.load(getClass.getClassLoader.getResourceAsStream("config/srbench.properties"))
+  val eval = new QueryEvaluator("crtm")
   val proxy=new EsperProxy(esper.system)
   val feed=new DataFeed("crtm",proxy)
 

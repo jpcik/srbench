@@ -21,11 +21,11 @@ object IOUtils {
       XSDDatatype.XSDinteger     
     }
     catch {
-      case _=>try {
+      case _:Throwable=>try {
         value.toDouble
         XSDDatatype.XSDdouble
       }
-      catch {case _=> XSDDatatype.XSDstring}        
+      catch {case _:Throwable=> XSDDatatype.XSDstring}        
     }
   }
   
